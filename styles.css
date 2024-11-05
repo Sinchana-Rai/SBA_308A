@@ -7,6 +7,13 @@ body {
   background-color: rgb(247, 212, 212);
 }
 
+.bg_rgba {
+  background: linear-gradient(0deg, rgba(186, 142, 142, 0.9), rgba(200, 159, 159, 0.9)), url('https://static.vecteezy.com/system/resources/thumbnails/001/501/968/small/cartoon-cats-and-dogs-vector.jpg');
+  position: relative;
+  height: 130px; 
+}
+
+
 .favourite-button {
   position: absolute;
   top: 10px;
