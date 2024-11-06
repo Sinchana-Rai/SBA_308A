@@ -3,7 +3,8 @@ import * as Carousel from "./Carousel.js"
 import axios from "axios";
 
 const breedSelect = document.getElementById("breedSelect");
-const speciesSelect = document.getElementById("speciesSelect"); // New dropdown for species selection
+const speciesSelect = document.getElementById("speciesSelect"); 
+const getFavouritesBtn = document.getElementById("getFavouritesBtn")
 
 const CAT_API_KEY = "live_Pwz1DDFj6lR8faG9VyV09FQbvpJGHDGSuCGU9YTUlBmYHmVOZBsnw3uURi3fQbA0";
 const DOG_API_KEY = "live_e1tuq0KHIXezhki0jU3qexK2gkX8oP8GqWF2fCPJUtohPr0H7R9nQxhSfkEiW15e";
@@ -76,57 +77,83 @@ breedSelect.addEventListener("change", async () => {
 initialLoad();
 speciesSelect.addEventListener("change", initialLoad);
 
+
 export async function favourite(imgId) {
 
+    let apiUrl;
+    let apiKey;
     
-    const getresposne=  await axios.get('https://api.thedogapi.com/v1/favourites',{ 
-     headers: { 
-         'Content-Type': 'application/json; charset=UTF-8',
-         'x-api-key': API_KEY
-     }
- });
- const favourites = getresposne.data;
- 
-     const existingFavourite = favourites.find(fav => fav.image_id === imgId);
- 
-     if (existingFavourite) {
-         console.log(`Image ${imgId} is exists in our favourites.`);
-            await axios.delete(`https://api.thedogapi.com/v1/favourites/${existingFavourite.id}`,{ 
-             headers: { 
-                 'Content-Type': 'application/json; charset=UTF-8',
-                 'x-api-key': API_KEY
-             }
-         });
-       console.log(`Image ${imgId} removed from favourites.`);
-     }
-
-     const response=  await axios.post('https://api.thedogapi.com/v1/favourites', {
-             image_id: imgId},{ 
-                 headers: { 
-                     'Content-Type': 'application/json; charset=UTF-8',
-                     'x-api-key': API_KEY
-                 }
-             });
-    console.log(response)
- 
- }
-
- getFavouritesBtn.addEventListener("click", async () => {
-    try {
-
-        const response=  await axios.get('https://api.thedogapi.com/v1/favourites',{ 
-            headers: { 
-                'Content-Type': 'application/json; charset=UTF-8',
-                'x-api-key': API_KEY
-            }
+    if (speciesSelect.value === "cat") {
+      apiUrl = "https://api.thecatapi.com/v1/favourites";
+      apiKey = CAT_API_KEY;
+    } else {
+      apiUrl = "https://api.thedogapi.com/v1/favourites";
+      apiKey = DOG_API_KEY;
+    }
+    
+    
+      try {
+          const getresposne = await axios.get(apiUrl, {
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+            "x-api-key": apiKey,
+          },
         });
-            const favourites = response.data;
+        const favourites = getresposne.data;
+    
+        const existingFavourite = favourites.find((fav) => fav.image_id === imgId);
+    
+        if (existingFavourite) {
+          console.log(`Image ${imgId} already exists in favourites.`);
+          await axios.delete(`${apiUrl}/${existingFavourite.id}`, {
+            headers: {
+              "Content-Type": "application/json; charset=UTF-8",
+              "x-api-key": apiKey,
+            },
+          });
+          console.log(`Image ${imgId} removed from favourites.`);
+        }
+    
+        const response = await axios.post(apiUrl, {
+          image_id: imgId,
+        }, {
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+            "x-api-key": apiKey,
+          },
+        });
+        console.log(response);
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
-            console.log("favourites"+ favourites)
+
+getFavouritesBtn.addEventListener("click", async () => {
+    
+  let apiUrl;
+  let apiKey;
+  
+  if (speciesSelect.value === "cat") {
+    apiUrl = "https://api.thecatapi.com/v1/favourites";
+    apiKey = CAT_API_KEY;
+  } else {
+    apiUrl = "https://api.thedogapi.com/v1/favourites";
+    apiKey = DOG_API_KEY;
+  }
+  
+    try {
+      const response = await axios.get(apiUrl, {
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+          "x-api-key": apiKey,
+        },
+      });
+      const favourites = response.data;
   
       Carousel.clear();
   
-      favourites.forEach(fav => {
+      favourites.forEach((fav) => {
         if (fav.image) {
           const altText = `Favourite Image ${fav.image.id}`;
           const carouselItem = Carousel.createCarouselItem(fav.image.url, altText, fav.image.id);
@@ -136,7 +163,6 @@ export async function favourite(imgId) {
   
       Carousel.start();
       console.log("Favourites loaded.");
-  
     } catch (error) {
       console.error("Error loading favourites:", error);
     }
