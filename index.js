@@ -9,35 +9,36 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn")
 const CAT_API_KEY = "live_Pwz1DDFj6lR8faG9VyV09FQbvpJGHDGSuCGU9YTUlBmYHmVOZBsnw3uURi3fQbA0";
 const DOG_API_KEY = "live_e1tuq0KHIXezhki0jU3qexK2gkX8oP8GqWF2fCPJUtohPr0H7R9nQxhSfkEiW15e";
 
-async function initialLoad() {
-  try {
+function initialLoad() {
     let apiUrl;
     let apiKey;
-
-     if (speciesSelect.value === "cat") {
+  
+    if (speciesSelect.value === "cat") {
       apiUrl = "https://api.thecatapi.com/v1/breeds";
       apiKey = CAT_API_KEY;
     } else {
       apiUrl = "https://api.thedogapi.com/v1/breeds";
       apiKey = DOG_API_KEY;
     }
-
-    const response = await axios.get(apiUrl, {
+  
+    axios.get(apiUrl, {
       headers: { "x-api-key": apiKey },
+    })
+    .then((response) => {
+      const jsonData = response.data;
+  
+      breedSelect.innerHTML = ""; 
+      jsonData.forEach((infos) => {
+        const option = document.createElement("option");
+        option.value = infos.id;
+        option.text = infos.name;
+        breedSelect.append(option);
+      });
+    })
+    .catch((error) => {
+      console.error(error);
     });
-    const jsonData = response.data;
-
-    breedSelect.innerHTML = "";
-    jsonData.forEach((infos) => {
-      const option = document.createElement("option");
-      option.value = infos.id;
-      option.text = infos.name;
-      breedSelect.append(option);
-    });
-  } catch (error) {
-    console.error(error);
   }
-}
 
 
 breedSelect.addEventListener("change", async () => {
